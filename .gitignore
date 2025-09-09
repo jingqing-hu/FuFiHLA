@@ -1,0 +1,22 @@
+# Ignore big genomics files by default
+*.fa
+*.fa.gz
+*.fq
+*.fq.gz
+*.bam
+*.sam
+*.paf
+*.vcf
+*.vcf.gz
+__pycache__/
+/env/*/
+.conda/
+.env/
+venv/
+test/HG002_out*/
+
+!share/fufihla/dps-dat/**/*.fa
+!share/fufihla/dps-dat/**/*.fa.gz
+!/test/*.fa
+!/test/*.fa.gz
+

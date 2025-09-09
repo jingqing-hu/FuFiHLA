@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+CLI_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+PREFIX_DIR="$(dirname "$CLI_DIR")"
+
+DATADIR="${FUFIHLA_DATADIR:-$PREFIX_DIR/share/fufihla}"
+SCRIPTS_DIR="$DATADIR/scripts"
+PY_DIR="$DATADIR/src"
+
+if [[ "${FUFIHLA_DEBUG:-0}" == "1" ]]; then
+  echo "[fufihla] CLI_DIR=$CLI_DIR"
+  echo "[fufihla] PREFIX_DIR=$PREFIX_DIR"
+  echo "[fufihla] DATADIR=$DATADIR"
+fi
+
+export FUFIHLA_DEFAULT_GENES="${FUFIHLA_DEFAULT_GENES:-$DATADIR/dps-dat/6genes.txt}"
+
+exec bash "$SCRIPTS_DIR/FuFiHLA.sh" "$@"
+
