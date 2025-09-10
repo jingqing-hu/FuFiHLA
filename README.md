@@ -2,13 +2,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)]()
-[![Conda](https://img.shields.io/badge/install%20with-conda-green.svg)](https://docs.conda.io/)
 
-FuFiHLA is a modular pipeline for accurate HLA gene typing and consensus sequence construction from long-read sequencing data.  
+FuFiHLA is a pipeline for accurate HLA gene full field typing and consensus sequence construction from long-read sequencing data.  
 It currently supports PacBio HiFi data on six clinically important transplant genes: **HLA-A, -B, -C, -DQA1, -DQB1, -DRB1**.
 
 ## Highlights
-- **Reference-free**: does *not* depend on GRCh38 or other whole-genome assemblies  
+- **Reference-free**: does *not* depend on a specific version if reference genome for example GRCh38 or CHM13  
 - **Improved consensus accuracy** compared to [StarPhase](#) (link TBD)  
 
 **Citation:** TBD
@@ -59,4 +58,21 @@ HLA-A*26:01:01:01  HLA-A*26_01_01_01  ...  cs:Z::3517
   - **Known Alleles**: `cs:Z::3503` → perfect match over 3503 bp 
   - **Novel Alleles** → cs:Z contains substitutions (*), insertions (+), or deletions (-)
 
+## Running tips
 
+1) extract reads from exist bam files can also generate similar result as using WGS reaads.
+
+```bash
+echo "
+chr6	29942254	29945755
+chr6	31268254	31272571
+chr6	31353362	31357442
+chr6	32578769	32589848
+chr6	32636717	32643200
+chr6	32660031	32667132" > sel.bed
+
+samtools view -bh ${bam} --region-file sel.bed | samtools fasta | gzip -c > out.fa.gz
+
+```
+
+2) prepare the latest version of reference allele sequences
