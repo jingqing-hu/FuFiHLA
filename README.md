@@ -7,7 +7,7 @@ FuFiHLA is a pipeline for accurate HLA gene full field typing and consensus sequ
 It currently supports PacBio HiFi data on six clinically important transplant genes: **HLA-A, -B, -C, -DQA1, -DQB1, -DRB1**.
 
 ## Highlights
-- **Reference-free**: does *not* depend on a specific version if reference genome for example GRCh38 or CHM13  
+- **Reference-free**: does *not* depend on a specific version of reference genome such GRCh38 or CHM13  
 - **Improved consensus accuracy** compared to [StarPhase](#) (link TBD)  
 
 **Citation:** TBD
@@ -25,6 +25,7 @@ conda install -c bioconda -c conda-forge fufihla
 ## Usage
 ```
 fufihla <input_reads.fa.gz> <output_dir>
+[??] fufihla --fa <input_reads.fa.gz> --refdir <reference data directory> --out <output_dir>
 ```
 Arguments
 - `<input_reads.fa.gz>` : raw PacBio HiFi reads (FASTA/FASTQ, gzipped)
@@ -60,7 +61,7 @@ HLA-A*26:01:01:01  HLA-A*26_01_01_01  ...  cs:Z::3517
 
 ## Running tips
 
-1) extract reads from exist bam files can also generate similar result as using WGS reaads.
+1) extract reads from exist bam files can also generate similar result as using WGS reads.
 
 ```bash
 echo "
