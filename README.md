@@ -23,24 +23,34 @@ conda install -c bioconda -c conda-forge fufihla
 ```
 
 ## Usage
+To download the latest reference allele sequences from IMGT:
 ```
-fufihla <input_reads.fa.gz> <output_dir>
-[??] fufihla --fa <input_reads.fa.gz> --refdir <reference data directory> --out <output_dir>
+fufihla-ref-prep
+```
+To run the pipeline:
+```
+fufihla --fa <input_reads.fa.gz> --out <output_dir>
+fufihla --fa <input_reads.fa.gz> --refdir <reference data directory> --out <output_dir> --debug
 ```
 Arguments
 - `<input_reads.fa.gz>` : raw PacBio HiFi reads (FASTA/FASTQ, gzipped)
 - `<output_dir>` : directory for pipeline outputs
+- `--refdir <reference_data_directory>`(optional): path to reference allele dataset; if omitted, uses the default bundled set
+- `--debug`(optional): keep all intermediate files; otherwise only consensus results are kept
 
 ## Quick Test
 A small toy dataset is included in `test/` for installation checks:
 ```
-cd test
-bash test.sh
+<path to installation>/test/HG002.fa.gz
 ```
-This runs FuFiHLA on `HG002.fa.gz` and produces:
-- `HG002_out/` → pipeline logs
-- `HG002_out.out` → result output
-- `HG002_out.err` → stderr log
+You can run with: 
+```
+fufihla --fa <path to installation>/test/HG002.fa.gz --out HG002
+```
+The output includes:
+- `HG002/` → pipeline logs
+- `HG002.out` → result output
+- `HG002.err` → stderr log
 
 ## Outputs
 A typical run produces:
@@ -76,4 +86,3 @@ samtools view -bh ${bam} --region-file sel.bed | samtools fasta | gzip -c > out.
 
 ```
 
-2) prepare the latest version of reference allele sequences

@@ -4,50 +4,42 @@ set -euo pipefail
 # Directory of this script
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd -P)"
 
-# Usage check
-if [[ $# -lt 2 || $# -gt 3 ]]; then
-  echo "Usage: $0 <input_reads.fq.gz> <output_dir> [<gene_list_file|CSV>]"
-  echo "  - If <gene_list> is omitted, default is: \${SCRIPT_DIR}/dps-dat/6genes.txt"
-  echo "  - <gene_list> must be:"
-  echo "      * a file with one gene per line (e.g. HLA-A), OR"
-  echo "      * a CSV string (e.g. HLA-A,HLA-B,HLA-C)"
+REF_DIR="${FUFIHLA_REF_DIR:-$SCRIPT_DIR/dps-dat}"
+DEFAULT_GENES="$SCRIPT_DIR/dps-dat/genes.list"
+ALLELE_FASTA="$REF_DIR/ref.gene.fa.gz"
+DEBUG="${FUFIHLA_DEBUG:-0}"
+
+INP_READS="${1:-}"
+OUT_DIR="${2:-}"
+if [[ -z "$INP_READS" || -z "$OUT_DIR" ]]; then
+  echo "Usage: $(basename "$0") <reads.fa.gz> <outdir>" >&2
+  exit 2
+fi
+mkdir -p "$OUT_DIR"
+
+GENE_LIST="$DEFAULT_GENES"
+if [[ ! -r "$GENE_LIST" ]]; then
+  echo "ERROR: Gene list not found/readable: $GENE_LIST" >&2
+  exit 1
+fi
+if [[ ! -r "$ALLELE_FASTA" ]]; then
+  echo "ERROR: Allele FASTA not found/readable: $ALLELE_FASTA" >&2
   exit 1
 fi
 
-INP_READS="$1"
-OUT_DIR="$2"
-USER_GENE_ARG="${3:-}"   # optional
-mkdir -p "${OUT_DIR}"
-
-DEFAULT_GENE_LIST="${SCRIPT_DIR}/dps-dat/6genes.txt"
-GENE_LIST=""
-
-if [[ -z "${USER_GENE_ARG}" ]]; then
-  # Use default
-  GENE_LIST="${DEFAULT_GENE_LIST}"
-elif [[ -f "${USER_GENE_ARG}" ]]; then
-  # Use user-provided file
-  GENE_LIST="$(cd "$(dirname "${USER_GENE_ARG}")" && pwd -P)/$(basename "${USER_GENE_ARG}")"
-else
-  # User gave CSV → write file
-  GENE_LIST="${OUT_DIR}/genes.list.txt"
-  IFS=',' read -r -a _genes_csv <<< "${USER_GENE_ARG}"
-  printf "%s\n" "${_genes_csv[@]}" \
-    | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
-    | awk 'NF' \
-    | awk '!seen[$0]++' > "${GENE_LIST}"
-fi
-
-if ! awk 'BEGIN{ok=1} {if ($0 !~ /^HLA-[A-Za-z0-9]+$/) {ok=0; exit}} END{exit ok?0:1}' "${GENE_LIST}"; then
-  echo "ERROR: Gene list must have one gene per line, format 'HLA-<NAME>' (e.g., HLA-A)" >&2
-  echo "Invalid content found in: ${GENE_LIST}" >&2
+if ! awk 'BEGIN{ok=1} {if ($0 !~ /^HLA-[A-Za-z0-9]+$/) {ok=0; exit}} END{exit ok?0:1}' "$GENE_LIST"; then
+  echo "ERROR: Gene list must be one gene per line, like 'HLA-A'." >&2
+  echo "Invalid content in: $GENE_LIST" >&2
   exit 1
 fi
 
-echo "[info] Using gene list: ${GENE_LIST}"
-echo "${GENE_LIST}" | sed 's/^/[info]   /'
+echo "[FuFiHLA] REF_DIR: $REF_DIR"
+echo "[FuFiHLA] GENE_LIST: $GENE_LIST"
+echo "[FuFiHLA] ALLELE_FASTA: $ALLELE_FASTA"
+echo "[FuFiHLA] DEBUG: $DEBUG"
 
 export GENE_LIST
+export ALLELE_FASTA
 
 
 # Define which steps to run (true/false)
@@ -115,7 +107,7 @@ step3() {
   local list_dir="${s2_out_pref}_list"
   local s3_out_paf="${OUT_DIR}/s3_out.paf.gz"
   local mm2thread=20
-  local template_gene_seq="${SCRIPT_DIR}/dps-dat/6gene.fa.gz"
+  local template_gene_seq="${ALLELE_FASTA}"
   local target_genes_file="${GENE_LIST}"
   local mm2opt="-t ${mm2thread} -e10000 -k19 -w19 -g10k \
     -A1 -B4 -O6,26 -E2,1 -s350 -I10k -c --ds --end-bonus=10"
@@ -126,10 +118,9 @@ step3() {
   # for each gene, build a little allele FASTA and read FASTA, then align
   while read -r GENE; do
     # gather allele IDs
-    grep "^>${GENE}\\*" "${SCRIPT_DIR}/dps-dat/6gene.list" \
-      | sed 's/^>//' \
-      > "${list_dir}/${GENE}.alleles.ids"
-
+    zgrep "^>${GENE}\\*" "${ALLELE_FASTA}" \
+	    | cut -d' ' -f1 | sed 's/^>//' \
+	    > "${list_dir}/${GENE}.alleles.ids"
     # if no alleles, skip
     if [[ ! -s "${list_dir}/${GENE}.alleles.ids" ]]; then
       echo "no alleles for ${GENE}, skipping" >&2
@@ -172,7 +163,7 @@ step5() {
   s5_inp_template_allele="${OUT_DIR}/s4_out_template_allelelist.txt"
   s5_inp_reads="${OUT_DIR}/s2_out.read-fa.gz"
 
-  all_allele_seq="${SCRIPT_DIR}/dps-dat/6gene.fa.gz"
+  all_allele_seq="${ALLELE_FASTA}"
   call_variants="${SCRIPT_DIR}/src/call_variants.py"
   time python3 ${call_variants} \
   ${s5_inp_template_allele} \
@@ -187,7 +178,7 @@ step5() {
 
 step6() {
   echo "Step 6: Realign reconstructed sequences"
-  local QUERY="${SCRIPT_DIR}/dps-dat/6gene.fa.gz"
+  local QUERY="${ALLELE_FASTA}"
   local CONS="${OUT_DIR}/new_allele.fa"
   local OUT_PAF="${OUT_DIR}/s6_out.paf.gz"
   local THREADS=20
@@ -208,6 +199,8 @@ step7() {
   cat "${OUT_PAF}" "${OUT_DIR}/known_allele.output.paf" \
     | sort -t$'\t' -k1,1
   >&2 echo "Final call complete"
+  mv -f "${OUT_DIR}"/*.paf "${OUT_DIR}/paf/"
+  mv -f "${OUT_DIR}"/*.fa "${OUT_DIR}/fas/"
 }
 
 main() {

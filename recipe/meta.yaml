@@ -17,7 +17,8 @@ requirements:
     - bcftools
     - htslib    
     - seqtk
-    - longcalld 
+    - longcalld
+    - unzip 
 
 about:
   summary: HLA typing pipeline for long reads (FuFiHLA) with a location-aware CLI.

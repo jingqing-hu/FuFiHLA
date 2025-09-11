@@ -6,15 +6,50 @@ PREFIX_DIR="$(dirname "$CLI_DIR")"
 
 DATADIR="${FUFIHLA_DATADIR:-$PREFIX_DIR/share/fufihla}"
 SCRIPTS_DIR="$DATADIR/scripts"
-PY_DIR="$DATADIR/src"
 
-if [[ "${FUFIHLA_DEBUG:-0}" == "1" ]]; then
-  echo "[fufihla] CLI_DIR=$CLI_DIR"
-  echo "[fufihla] PREFIX_DIR=$PREFIX_DIR"
-  echo "[fufihla] DATADIR=$DATADIR"
+IN_FA=""
+OUT_DIR=""
+REF_DIR_DEFAULT="$DATADIR/dps-dat"
+REF_DIR="${FUFIHLA_REF_DIR:-$REF_DIR_DEFAULT}"
+DEBUG=0
+
+usage() {
+  echo "Usage: fufihla --fa reads.fa.gz --out outdir [--refdir dir] [--debug]"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --fa) IN_FA="$2"; shift 2 ;;
+    --out) OUT_DIR="$2"; shift 2 ;;
+    --refdir) REF_DIR="$2"; shift 2 ;;
+    --debug) DEBUG=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown or positional arg: $1"; usage; exit 2 ;;
+  esac
+done
+
+[[ -n "$IN_FA" ]]   || { echo "[fufihla] --fa required"; usage; exit 2; }
+[[ -n "$OUT_DIR" ]] || { echo "[fufihla] --out required"; usage; exit 2; }
+
+# Check references
+if [[ ! -s "$REF_DIR/ref.gene.fa.gz" ]]; then
+  echo "[fufihla] ERROR: $REF_DIR/ref.gene.fa.gz not found." >&2
+  echo "[fufihla] Run:  fufihla-ref-prep   in a new folder to build refs." >&2
+  exit 1
 fi
 
-export FUFIHLA_DEFAULT_GENES="${FUFIHLA_DEFAULT_GENES:-$DATADIR/dps-dat/6genes.txt}"
+export FUFIHLA_REF_DIR="$REF_DIR"
+export FUFIHLA_DEBUG="$DEBUG"
+export FUFIHLA_DEFAULT_GENES="$REF_DIR/genes.list"
 
-exec bash "$SCRIPTS_DIR/FuFiHLA.sh" "$@"
+bash "$SCRIPTS_DIR/FuFiHLA.sh" "$IN_FA" "$OUT_DIR"
 
+if [[ "$DEBUG" -ne 1 ]]; then
+  echo "[fufihla] Cleaning intermediates in $OUT_DIR ..."
+  rm -rf "$OUT_DIR"/{bam,fas,lists,paf} \
+         "$OUT_DIR"/s* \
+         "$OUT_DIR"/vcf* \
+         "$OUT_DIR"/allele_to_reads.txt \
+         "$OUT_DIR"/read_assignment.txt 2>/dev/null || true
+  echo "[fufihla] Kept only consensus/ and final outputs."
+fi

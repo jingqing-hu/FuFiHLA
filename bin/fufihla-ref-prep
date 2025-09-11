@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+CLI_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+PREFIX_DIR="$(dirname "$CLI_DIR")"
+REF_DIR="$PREFIX_DIR/share/fufihla/ref"
+
+exec bash "$REF_DIR/ref-prep.sh" "$@"
