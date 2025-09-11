@@ -30,7 +30,7 @@ fufihla-ref-prep
 To run the pipeline:
 ```
 fufihla --fa <input_reads.fa.gz> --out <output_dir>
-fufihla --fa <input_reads.fa.gz> --refdir <reference data directory> --out <output_dir> --debug
+fufihla --fa <input_reads.fa.gz> --out <output_dir> --refdir <reference data directory>  --debug
 ```
 Arguments
 - `<input_reads.fa.gz>` : raw PacBio HiFi reads (FASTA/FASTQ, gzipped)
@@ -71,9 +71,10 @@ HLA-A*26:01:01:01  HLA-A*26_01_01_01  ...  cs:Z::3517
 
 ## Running tips
 
-1) extract reads from exist bam files can also generate similar result as using WGS reads.
+* Extract reads from exist bam files can also generate similar result as using WGS reads. 
 
 ```bash
+## save the six gene locations into bed format
 echo "
 chr6	29942254	29945755
 chr6	31268254	31272571
@@ -82,6 +83,7 @@ chr6	32578769	32589848
 chr6	32636717	32643200
 chr6	32660031	32667132" > sel.bed
 
+## Extract the reads covering the target gene region
 samtools view -bh ${bam} --region-file sel.bed | samtools fasta | gzip -c > out.fa.gz
 
 ```
