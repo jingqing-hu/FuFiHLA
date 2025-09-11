@@ -1,9 +1,9 @@
-# FuFiHLA: HLA Typing Pipeline for Long Reads
+# FuFiHLA: Full Field HLA allele typing for Long Reads
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)]()
 
-FuFiHLA is a pipeline for accurate HLA gene full field typing and consensus sequence construction from long-read sequencing data.  
+FuFiHLA is a pipeline for full field HLA allele typing and consensus sequence construction from long-read sequencing data. 
 It currently supports PacBio HiFi data on six clinically important transplant genes: **HLA-A, -B, -C, -DQA1, -DQB1, -DRB1**.
 
 ## Highlights
@@ -22,35 +22,42 @@ Install from **Bioconda** (recommended):
 conda install -c bioconda -c conda-forge fufihla
 ```
 
-## Usage
-To download the latest reference allele sequences `ref.gene.fa.gz` from IMGT:
+## Quick Test
+
+with 'test.fa.gz' under the folder "test", run:
+```bash
+fufihla --fa test.fa.gz --out test_dir
 ```
+
+The output includes:
+- `test_dir/` → pipeline logs
+- `test_dir.out` → result output
+- `test_dir.err` → stderr log
+
+## Usage
+
+To use the latest reference allele sequences from IMGT, type:
+```bash
 fufihla-ref-prep
 ```
-To run the pipeline:
-```
+?? where the download file be saved? What is the file name?
+
+
+run the pipeline:
+```bash
+# with default reference allele sequences, version XXX (add IMGT version number here)
 fufihla --fa <input_reads.fa.gz> --out <output_dir>
+# or with the specific version of reference data
 fufihla --fa <input_reads.fa.gz> --out <output_dir> --refdir <reference data directory>  --debug
 ```
+
 Arguments
-- `<input_reads.fa.gz>` : raw PacBio HiFi reads (FASTA/FASTQ, gzipped)
+- `<input_reads.fa.gz>` : raw PacBio HiFi reads (FASTA/FASTQ, gzipped) ??? test whether the non-gziped can work or not. I believe it also can work.
 - `<output_dir>` : directory for pipeline outputs
 - `--refdir <reference_data_directory>`(optional): path to reference allele dataset; if omitted, uses the default bundled set
 - `--debug`(optional): keep all intermediate files; otherwise only consensus results are kept
 
-## Quick Test
-A small toy dataset is included in `test/` for installation checks:
-```
-<path to installation>/test/HG002.fa.gz
-```
-You can run with: 
-```
-fufihla --fa <path to installation>/test/HG002.fa.gz --out HG002
-```
-The output includes:
-- `HG002/` → pipeline logs
-- `HG002.out` → result output
-- `HG002.err` → stderr log
+
 
 ## Outputs
 A typical run produces:
@@ -64,6 +71,8 @@ HLA-A*01:01:01:01  HLA-A*01_01_01_01  ...  cs:Z::3503
 HLA-A*26:01:01:01  HLA-A*26_01_01_01  ...  cs:Z::3517
 ```
 
+?? as discussed, you may give more details about the output here.
+
 - **Column 1** → the **allele name** called by FuFiHLA  
 - **Last column** (`cs:Z`) → minimap2 cs tag encoding base-level matches/mismatches:
   - **Known Alleles**: `cs:Z::3503` → perfect match over 3503 bp 
@@ -74,7 +83,7 @@ HLA-A*26:01:01:01  HLA-A*26_01_01_01  ...  cs:Z::3517
 * Extract reads from exist bam files can also generate similar result as using WGS reads. 
 
 ```bash
-## save the six gene locations into bed format
+## save the six gene locations into bed format based on the gene annotation file
 echo "
 chr6	29942254	29945755
 chr6	31268254	31272571
