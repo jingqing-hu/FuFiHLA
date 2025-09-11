@@ -23,7 +23,7 @@ conda install -c bioconda -c conda-forge fufihla
 ```
 
 ## Usage
-To download the latest reference allele sequences from IMGT:
+To download the latest reference allele sequences `ref.gene.fa.gz` from IMGT:
 ```
 fufihla-ref-prep
 ```
