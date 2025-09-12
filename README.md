@@ -8,7 +8,7 @@ It currently supports PacBio HiFi data on six clinically important transplant ge
 
 ## Highlights
 - **Reference-free**: does *not* depend on a specific version of reference genome such GRCh38 or CHM13  
-- **Improved consensus accuracy** compared to [StarPhase](#) (link TBD)  
+- **Improved consensus accuracy** compared to [StarPhase](https://github.com/PacificBiosciences/pb-StarPhase)
 
 **Citation:** TBD
 
