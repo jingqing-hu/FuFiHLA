@@ -475,24 +475,31 @@ for gene in GENES:
 
         # 6b) Build consensus
         with open(cons_fa, "w") as cf:
-            subprocess.run(
-                ["bcftools","consensus","-f", ref_fa, vcf],
-                stdout=cf,
-                check=True
+            p1 = subprocess.Popen(
+                ["bcftools", "consensus", "-f", ref_fa, vcf],
+                stdout=subprocess.PIPE,
+                text=True
             )
-
-          
+            p2 = subprocess.Popen(
+                ["sed", r"s/^>/>cons_/"],
+                stdin=p1.stdout,
+                stdout=cf,
+                text=True
+            )
+            p1.stdout.close()
+            p2.communicate()         
+ 
 with open(os.path.join(OUTDIR, "new_allele.fa"), "w") as out:
     for fname in new_allele_list:
         with open(fname, "r") as infile:
             out.write(infile.read())
 
-
 def normalize_header(header_line: str) -> str:
-    # Take the first token (">HLA-A*02_06_01_01"), change back to normal nomenclature
     token = header_line.strip().split()[0]      
-    allele = token.lstrip('>')                    
-    return allele.replace('_', ':') # → "HLA-A*02:06:01:01"
+    allele = token.lstrip('>')
+    if allele.startswith("cons_"):  # strip the prefix if present
+        allele = allele[len("cons_"):]
+    return allele.replace('_', ':')  # → HLA-A*02:06:01:01
 
 with open(os.path.join(OUTDIR, "known_allele.paf"), "w") as out_paf:
     for cons_fa in known_allele_list:

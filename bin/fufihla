@@ -42,7 +42,9 @@ export FUFIHLA_REF_DIR="$REF_DIR"
 export FUFIHLA_DEBUG="$DEBUG"
 export FUFIHLA_DEFAULT_GENES="$REF_DIR/genes.list"
 
-bash "$SCRIPTS_DIR/FuFiHLA.sh" "$IN_FA" "$OUT_DIR"
+bash "$SCRIPTS_DIR/FuFiHLA.sh" "$IN_FA" "$OUT_DIR" \
+    1>"$OUT_DIR.out" \
+    2>"$OUT_DIR.err"
 
 if [[ "$DEBUG" -ne 1 ]]; then
   echo "[fufihla] Cleaning intermediates in $OUT_DIR ..."

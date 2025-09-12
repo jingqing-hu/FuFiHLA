@@ -6,6 +6,9 @@ echo "${SCRIPT_DIR}"
 EASYIPD="${SCRIPT_DIR}/easyIPD.py"
 GENELIST="${SCRIPT_DIR}/gene.list"
 
+mkdir -p ref_data
+cd ref_data
+
 # Download IMGT/HLA database
 wget -O hla.dat.zip "https://github.com/ANHIG/IMGTHLA/raw/refs/heads/Latest/hla.dat.zip"
 

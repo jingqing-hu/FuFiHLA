@@ -40,8 +40,7 @@ To use the latest reference allele sequences from IMGT, type:
 ```bash
 fufihla-ref-prep
 ```
-?? where the download file be saved? What is the file name?
-
+This will create a directory called `ref_data`, which would contain the reference allele sequence `ref.gene.fa.gz`. 
 
 run the pipeline:
 ```bash
@@ -52,7 +51,7 @@ fufihla --fa <input_reads.fa.gz> --out <output_dir> --refdir <reference data dir
 ```
 
 Arguments
-- `<input_reads.fa.gz>` : raw PacBio HiFi reads (FASTA/FASTQ, gzipped) ??? test whether the non-gziped can work or not. I believe it also can work.
+- `<input_reads.fa.gz>` : raw PacBio HiFi reads (.fa/.fa.gz/.fq/.fq.gz)
 - `<output_dir>` : directory for pipeline outputs
 - `--refdir <reference_data_directory>`(optional): path to reference allele dataset; if omitted, uses the default bundled set
 - `--debug`(optional): keep all intermediate files; otherwise only consensus results are kept
@@ -67,13 +66,12 @@ A typical run produces:
 Allele calls are printed to standard output in **PAF-like format** with minimap2 tags.
 Example:
 ```
-HLA-A*01:01:01:01  HLA-A*01_01_01_01  ...  cs:Z::3503
-HLA-A*26:01:01:01  HLA-A*26_01_01_01  ...  cs:Z::3517
+HLA-A*01:01:01:01  cons_HLA-A*01_01_01_01  ...  cs:Z::3503
+HLA-A*26:01:01:01  cons_HLA-A*26_01_01_01  ...  cs:Z::3517
 ```
 
-?? as discussed, you may give more details about the output here.
-
-- **Column 1** → the **allele name** called by FuFiHLA  
+- **Column 1** → the **allele name** called by FuFiHLA
+- **Column 2** → the consensus sequence build upon allele in the suffix
 - **Last column** (`cs:Z`) → minimap2 cs tag encoding base-level matches/mismatches:
   - **Known Alleles**: `cs:Z::3503` → perfect match over 3503 bp 
   - **Novel Alleles** → cs:Z contains substitutions (*), insertions (+), or deletions (-)

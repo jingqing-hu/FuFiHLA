@@ -18,7 +18,8 @@ requirements:
     - htslib    
     - seqtk
     - longcalld
-    - unzip 
+    - unzip
+    - wget 
 
 about:
   summary: HLA typing pipeline for long reads (FuFiHLA) with a location-aware CLI.
