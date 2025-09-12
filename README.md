@@ -63,7 +63,7 @@ A typical run produces:
 ```
 <outdir>/consensus/*_asm*.fa        → consensus allele FASTA sequences
 ```
-Allele calls are printed to standard output in **PAF-like format** with minimap2 tags.
+Allele calls are printed to `<output_dir>.out` in **PAF-like format** with minimap2 tags.
 Example:
 ```
 HLA-A*01:01:01:01  cons_HLA-A*01_01_01_01  ...  cs:Z::3503
