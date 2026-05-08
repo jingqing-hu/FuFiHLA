@@ -13,7 +13,7 @@ It currently supports PacBio HiFi data on six clinically important transplant ge
 * **Reference-free**: does *not* depend on a specific version of reference genome such GRCh38 or CHM13
 * **Improved consensus accuracy** compared to StarPhase
 
-**Citation:** TBD
+**Citation:** Jingqing Hu, Qian Qin, Heng Li, Ying Zhou, FuFiHLA: A tool for Full-Field HLA typing from long-read data, Bioinformatics, 2026;, btag231, https://doi.org/10.1093/bioinformatics/btag231
 
 ---
 
